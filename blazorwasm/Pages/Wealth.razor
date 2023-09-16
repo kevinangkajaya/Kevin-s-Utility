@@ -1,0 +1,86 @@
+﻿@page "/wealth"
+
+<PageTitle>Wealth</PageTitle>
+
+<h1>Wealth</h1>
+
+<div class="text-end">
+    <button class="btn btn-primary" @onclick="NewItem">New Item</button>
+</div>
+
+<div class="mt-3">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Location</th>
+                <th>Sublocation</th>
+                <th>Active</th>
+                <th>Value</th>
+                <th>Value in Rupiah</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (result != null && result.Count > 0)
+            {
+                foreach (var datum in result)
+                {
+                    <tr>
+                        <td>@datum.Location</td>
+                        <td>@datum.Sublocation</td>
+                        <td>
+                            @if (datum.Active)
+                            {
+                                <span class="oi oi-check" style="color: green;" aria-hidden="true" />
+                            }
+                        </td>
+                        <td class="text-end">@datum.Value</td>
+                        <td class="text-end">@datum.ValueInRupiah</td>
+                        <td class="text-center">
+                            <span class="oi oi-pencil" aria-hidden="true" />
+                            <span class="oi oi-trash" aria-hidden="true" />
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td class="text-center" colspan="6">@errorMsg</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+@code {
+    private string errorMsg = "";
+    List<ResultStruct> result = new List<ResultStruct>();
+
+    public class ResultStruct
+    {
+        public string Location = "";
+        public string Sublocation = "";
+        public bool Active;
+        public string Value = "";
+        public string ValueInRupiah = "";
+    }
+
+    private void NewItem()
+    {
+        errorMsg = "";
+
+        ResultStruct resultStruct = new ResultStruct();
+        resultStruct.Location = "Tokocrypto";
+        resultStruct.Sublocation = "ETH";
+        resultStruct.Active = false;
+        double x = 0.00856369;
+        double y = 202052.276;
+        resultStruct.Value = $"{x:n7}";
+        resultStruct.ValueInRupiah = $"{y:n2}";
+
+        result.Add(resultStruct);
+    }
+
+}

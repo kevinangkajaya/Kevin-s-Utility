@@ -1,0 +1,110 @@
+﻿@page "/fibonacci"
+
+<PageTitle>Fibonacci</PageTitle>
+
+<h1>Fibonacci</h1>
+
+<div class="">
+    @* <input type="number" class="form-control" @bind="fiboLoop" placeholder="Input loop of fibonacci" /> *@
+    <label for="fibInput">Input fibonacci n term (min: 1, max: 180)</label>
+    <input id="fibInput" min="0" max="180" type="number" class="form-control" @onchange="OnChange" />
+    @* <button class="btn btn-primary ms-2" @onclick="Submit">Submit</button> *@
+</div>
+
+<div class="mt-2">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Fn</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (result != null && result.Count > 0)
+            {
+                foreach (var datum in result)
+                {
+                    <tr>
+                        <td>@datum.nTerm</td>
+                        <td class="text-end">@datum.value</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td class="text-center" colspan="2">@errorMsg</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
+
+@code {
+    @* private int fiboLoop = 0; *@
+    private List<Int128> data = new List<Int128>();
+    private List<ResultStruct> result = new List<ResultStruct>();
+    private string errorMsg = "";
+
+    public class ResultStruct
+    {
+        public int nTerm;
+        public string value = "";
+    }
+
+    private void OnChange(ChangeEventArgs e)
+    {
+        data = new List<Int128>();
+        result = new List<ResultStruct>();
+        errorMsg = "";
+
+        Int128 value = 0;
+        if (e != null && e.Value != null)
+        {
+            bool success = Int128.TryParse(e.Value.ToString(), out value);
+        }
+
+        if (value <= 0)
+        {
+            errorMsg = "Number should be above 0";
+            return;
+        }
+        else if (value > 180)
+        {
+            errorMsg = "Number cannot not exceed 180";
+            return;
+        };
+
+        data.Add(1);
+        if (value > 1)
+        {
+            data.Add(1);
+        }
+        if (value > 2)
+        {
+            for (int i = 2; i < value; i++)
+            {
+                Int128 nextValue = data[i - 1] + data[i - 2];
+                data.Add(nextValue);
+            }
+        }
+
+        int start = data.Count - 5;
+        if (start < 0) start = 0;
+        for (int i = start; i < data.Count; i++)
+        {
+            ResultStruct resultStruct = new ResultStruct();
+            resultStruct.nTerm = i + 1;
+            resultStruct.value = data[i].ToString("N0");
+
+            result.Add(resultStruct);
+        }
+
+        if (result.Count == 0)
+        {
+            errorMsg = "No data";
+        }
+    }
+
+}
