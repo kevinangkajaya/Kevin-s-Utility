@@ -1,4 +1,6 @@
 ﻿@page "/fibonacci"
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @inject HttpClient Http
 @inject IConfiguration Configuration
 
@@ -27,8 +29,8 @@
                 foreach (var datum in result)
                 {
                     <tr>
-                        <td>@datum.nTerm</td>
-                        <td class="text-end">@datum.value</td>
+                        <td>@datum.NTerm</td>
+                        <td class="text-end">@datum.Value</td>
                     </tr>
                 }
             }
@@ -45,102 +47,67 @@
 
 @code {
     @* private int fiboLoop = 0; *@
-    private List<Int128> data = new List<Int128>();
     private List<ResultStruct> result = new List<ResultStruct>();
     private string errorMsg = "";
 
     public class ResultStruct
     {
-        public int nTerm;
-        public string value = "";
+        public int NTerm { get; set; }
+        public string Value { get; set; } = "";
     }
 
-    private string getFibonacciApiUrl(string suffix)
+    private string GetFibonacciApiUrl(string suffix, string queryString = "")
     {
-        return Configuration["fibonacciApiUrl"] + suffix;
+        var url = Configuration["fibonacciApiUrl"] + suffix;
+        if (queryString != "")
+        {
+            url += "?" + queryString;
+        }
+        return url;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected async Task<List<ResultStruct>> GetFibonacci(int fn)
     {
+        var fibonacciGet = new List<ResultStruct>();
         try
         {
-            var weather = await Http.GetFromJsonAsync<ResultStruct[]>(getFibonacciApiUrl("weatherforecast"));
-            Console.WriteLine(weather);
+            var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+            queryString.Add("fn", fn.ToString());
+
+            fibonacciGet = await Http.GetFromJsonAsync<List<ResultStruct>>(GetFibonacciApiUrl("fibonacci/get",
+            queryString.ToString()));
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
         }
-        try
-        {
-            var weatherForecast = await
-            Http.GetFromJsonAsync<ResultStruct[]>(getFibonacciApiUrl("weather_forecast"));
-            Console.WriteLine(weatherForecast);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-        try
-        {
-            var fibonacciGet = await Http.GetFromJsonAsync<ResultStruct[]>(getFibonacciApiUrl("fibonacci/get"));
-            Console.WriteLine(fibonacciGet);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
+        return fibonacciGet;
     }
 
-    private void OnChange(ChangeEventArgs e)
+    private async Task OnChange(ChangeEventArgs e)
     {
-        data = new List<Int128>();
         result = new List<ResultStruct>();
         errorMsg = "";
 
-        Int128 value = 0;
+        int fn = 0;
         if (e != null && e.Value != null)
         {
-            bool success = Int128.TryParse(e.Value.ToString(), out value);
+            bool success = int.TryParse(e.Value.ToString(), out fn);
         }
 
-        if (value <= 0)
+        if (fn <= 0)
         {
             errorMsg = "Number should be above 0";
             return;
         }
-        else if (value > 180)
+        else if (fn > 180)
         {
             errorMsg = "Number cannot not exceed 180";
             return;
         };
 
-        data.Add(1);
-        if (value > 1)
-        {
-            data.Add(1);
-        }
-        if (value > 2)
-        {
-            for (int i = 2; i < value; i++)
-            {
-                Int128 nextValue = data[i - 1] + data[i - 2];
-                data.Add(nextValue);
-            }
-        }
-
-        int start = data.Count - 5;
-        if (start < 0) start = 0;
-        for (int i = start; i < data.Count; i++)
-        {
-            ResultStruct resultStruct = new ResultStruct();
-            resultStruct.nTerm = i + 1;
-            resultStruct.value = data[i].ToString("N0");
-
-            result.Add(resultStruct);
-        }
-
-        if (result.Count == 0)
+        result = await GetFibonacci(fn);
+        if (result == null || result.Count == 0)
         {
             errorMsg = "No data";
         }
