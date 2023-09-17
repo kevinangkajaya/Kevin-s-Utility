@@ -1,4 +1,6 @@
 ﻿@page "/fibonacci"
+@inject HttpClient Http
+@inject IConfiguration Configuration
 
 <PageTitle>Fibonacci</PageTitle>
 
@@ -51,6 +53,43 @@
     {
         public int nTerm;
         public string value = "";
+    }
+
+    private string getFibonacciApiUrl(string suffix)
+    {
+        return Configuration["fibonacciApiUrl"] + suffix;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var weather = await Http.GetFromJsonAsync<ResultStruct[]>(getFibonacciApiUrl("weatherforecast"));
+            Console.WriteLine(weather);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        try
+        {
+            var weatherForecast = await
+            Http.GetFromJsonAsync<ResultStruct[]>(getFibonacciApiUrl("weather_forecast"));
+            Console.WriteLine(weatherForecast);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        try
+        {
+            var fibonacciGet = await Http.GetFromJsonAsync<ResultStruct[]>(getFibonacciApiUrl("fibonacci/get"));
+            Console.WriteLine(fibonacciGet);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
     }
 
     private void OnChange(ChangeEventArgs e)

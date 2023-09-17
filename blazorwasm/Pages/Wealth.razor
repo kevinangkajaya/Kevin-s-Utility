@@ -12,6 +12,7 @@
     <table class="table table-bordered">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Location</th>
                 <th>Sublocation</th>
                 <th>Active</th>
@@ -26,6 +27,7 @@
                 foreach (var datum in result)
                 {
                     <tr>
+                        <td>@datum.ID</td>
                         <td>@datum.Location</td>
                         <td>@datum.Sublocation</td>
                         <td>
@@ -36,9 +38,11 @@
                         </td>
                         <td class="text-end">@datum.Value</td>
                         <td class="text-end">@datum.ValueInRupiah</td>
-                        <td class="text-center">
-                            <span class="oi oi-pencil" aria-hidden="true" />
-                            <span class="oi oi-trash" aria-hidden="true" />
+                        <td class="">
+                            <span class="oi oi-pencil" style="cursor:pointer" @onclick="((e) => UpdateItem(e, datum.ID))"
+                                aria-hidden="true" />
+                            <span class="oi oi-trash" style="cursor:pointer" @onclick="((e) => DeleteItem(e, datum.ID))"
+                                aria-hidden="true" />
                         </td>
                     </tr>
                 }
@@ -55,11 +59,13 @@
 </div>
 
 @code {
+    private int newID = 1;
     private string errorMsg = "";
     List<ResultStruct> result = new List<ResultStruct>();
 
     public class ResultStruct
     {
+        public int ID;
         public string Location = "";
         public string Sublocation = "";
         public bool Active;
@@ -72,6 +78,7 @@
         errorMsg = "";
 
         ResultStruct resultStruct = new ResultStruct();
+        resultStruct.ID = newID++;
         resultStruct.Location = "Tokocrypto";
         resultStruct.Sublocation = "ETH";
         resultStruct.Active = false;
@@ -83,4 +90,16 @@
         result.Add(resultStruct);
     }
 
+    private void UpdateItem(MouseEventArgs e, int ID)
+    {
+        Console.WriteLine("update " + ID);
+        ResultStruct resultStruct = result.First(x => x.ID == ID);
+    }
+
+    private void DeleteItem(MouseEventArgs e, int ID)
+    {
+        Console.WriteLine("delete " + ID);
+        int index = result.FindIndex(x => x.ID == ID);
+        result.RemoveAt(index);
+    }
 }
