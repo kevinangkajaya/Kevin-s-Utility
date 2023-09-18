@@ -16,7 +16,7 @@ public class WealthController : ControllerBase
 
     [HttpGet]
     [Route("get")]
-    public IEnumerable<Wealth> Get()
+    public IActionResult Get()
     {
         List<Wealth> wealth = new List<Wealth>();
 
@@ -35,13 +35,45 @@ public class WealthController : ControllerBase
             wealth.Add(temp);
         }
 
-        return wealth;
+        return Ok(wealth);
+    }
+
+    [HttpGet]
+    [Route("get/{ID}")]
+    public IActionResult GetByID(int ID)
+    {
+        Wealth temp = new Wealth();
+        temp.ID = ID;
+        temp.Location = "Tokocrypto";
+        temp.Sublocation = "ETH";
+        temp.Active = true;
+        double x = 0.43534;
+        double y = 76876.276;
+        temp.Value = x;
+        temp.ValueInRupiah = y;
+
+        return Ok(temp);
     }
 
     [HttpPost]
     [Route("new")]
-    public bool New(Wealth wealth)
+    public IActionResult New(Wealth wealth)
     {
+        string errMsg = "";
+        if (wealth.Location == "")
+        {
+            errMsg = "Location is required";
+        }
+        else if (wealth.Sublocation == "")
+        {
+            errMsg = "Sub Location is required";
+        }
+
+        if (errMsg != "")
+        {
+            return BadRequest(errMsg);
+        }
+
         Wealth temp = new Wealth();
         try
         {
@@ -54,16 +86,35 @@ public class WealthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return false;
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
 
-        return true;
+        return Ok();
     }
 
     [HttpPut]
     [Route("update")]
-    public bool Update(Wealth wealth)
+    public IActionResult Update(Wealth wealth)
     {
+        string errMsg = "";
+        if (wealth.ID == 0)
+        {
+            errMsg = "ID is required";
+        }
+        else if (wealth.Location == "")
+        {
+            errMsg = "Location is required";
+        }
+        else if (wealth.Sublocation == "")
+        {
+            errMsg = "Sub Location is required";
+        }
+
+        if (errMsg != "")
+        {
+            return BadRequest(errMsg);
+        }
+
         try
         {
             Wealth temp = new Wealth();
@@ -76,18 +127,36 @@ public class WealthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return false;
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
 
-        return true;
+        return Ok();
     }
 
     [HttpDelete]
     [Route("delete/{ID}")]
-    public bool Delete(int ID)
+    public IActionResult Delete(int ID)
     {
-        Console.WriteLine(ID);
+        string errMsg = "";
+        if (ID == 0)
+        {
+            errMsg = "ID is required";
+        }
 
-        return true;
+        if (errMsg != "")
+        {
+            return BadRequest(errMsg);
+        }
+
+        try
+        {
+
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+
+        return Ok();
     }
 }

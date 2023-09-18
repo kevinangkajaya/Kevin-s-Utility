@@ -1,15 +1,20 @@
 ﻿@page "/wealth"
 @inject IConfiguration Configuration
 @inject HttpClient Http
+@inject NavigationManager NavigationManager
 
 <PageTitle>Wealth</PageTitle>
 
 <h1>Wealth</h1>
 
 <div class="text-end">
-    <button class="btn btn-primary" @onclick="NewItem">New Item</button>
+    <a class="btn btn-primary" href="wealth/add">New Item</a>
 </div>
-error: @errorMsg
+
+@if(successMsg != ""){
+    <div class="mt-3 alert alert-success">@successMsg</div>
+}
+
 <div class="mt-3">
     <table class="table table-bordered">
         <thead>
@@ -41,9 +46,10 @@ error: @errorMsg
                         <td class="text-end">@datum.ValueString</td>
                         <td class="text-end">@datum.ValueInRupiahString</td>
                         <td class="">
-                            <span class="oi oi-pencil" style="cursor:pointer" @onclick="((e) => UpdateItem(e, datum.ID))"
-                                aria-hidden="true" />
-                            <span class="oi oi-trash" style="cursor:pointer" @onclick="((e) => DeleteItem(e, datum.ID))"
+                            @* <span disabled="@disabled" class="oi oi-pencil" style="cursor:pointer" @onclick="((e) => UpdateItem(e, datum.ID))"
+                                aria-hidden="true" /> *@
+                                <a disabled="@disabled" class="oi oi-pencil" href="wealth/edit/@datum.ID" aria-hidden="true" />
+                            <span disabled="@disabled" class="oi oi-trash" style="cursor:pointer" @onclick="((e) => DeleteItem(e, datum.ID))"
                                 aria-hidden="true" />
                         </td>
                     </tr>
@@ -61,7 +67,9 @@ error: @errorMsg
 </div>
 
 @code {
+    private string successMsg = "";
     private string errorMsg = "";
+    private bool disabled = false;
     List<ResultStruct> result = new List<ResultStruct>();
 
     public class ResultStruct
@@ -101,135 +109,53 @@ error: @errorMsg
             @* queryString.Add("fn", fn.ToString()); *@
 
             result = await Http.GetFromJsonAsync<List<ResultStruct>>(GetWealthApiUrl("wealth/get",
-            queryString.ToString()));
+            queryString.ToString()));            
+
+            if (result == null || result.Count == 0)
+            {
+                throw new Exception("No data");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-        }
-
-        if (result == null || result.Count == 0)
-        {
-            errorMsg = "No data";
-        }
-    }
-
-    private async Task NewItem()
-    {
-        var success = false;
-        try
-        {
-            double x = 0.00856369;
-            double y = 202052.276;
-            var postBody = new
-            {
-                Location = "Tokocrypto",
-                Sublocation = "ETH",
-                Active = true,
-                Value = x,
-                ValueInRupiah = y
-            };
-
-            var response = await Http.PostAsJsonAsync(GetWealthApiUrl("wealth/new"), postBody);
-            if (response.IsSuccessStatusCode)
-            {
-                var stringData = await response.Content.ReadAsStringAsync();
-                success = Boolean.Parse(stringData);
-            }
-            else
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-
-        if (!success)
-        {
-            errorMsg = "Create New Item failed";
-        }
-    }
-
-    private async Task UpdateItem(MouseEventArgs e, int ID)
-    {
-        Console.WriteLine("update " + ID);
-        ResultStruct resultStruct = result.First(x => x.ID == ID);
-
-        var success = false;
-        try
-        {
-            double x = 0.00856369;
-            double y = 202052.276;
-            var body = new
-            {
-                ID = ID,
-                Location = "Tokocrypto",
-                Sublocation = "ETH",
-                Active = true,
-                Value = x,
-                ValueInRupiah = y
-            };
-
-            var response = await Http.PutAsJsonAsync(GetWealthApiUrl("wealth/update"), body);
-            if (response.IsSuccessStatusCode)
-            {
-                var stringData = await response.Content.ReadAsStringAsync();
-                success = Boolean.Parse(stringData);
-            }
-            else
-            {
-                throw new Exception(response.ReasonPhrase);
-            }
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-        }
-
-        if (!success)
-        {
-            errorMsg = "Update Item failed";
+            Console.WriteLine(ex.ToString());
+            errorMsg = ex.Message;
         }
     }
 
     private async Task DeleteItem(MouseEventArgs e, int ID)
     {
-        Console.WriteLine("delete " + ID);
-        @* int index = result.FindIndex(x => x.ID == ID);
+        @* Console.WriteLine("delete " + ID);
+int index = result.FindIndex(x => x.ID == ID);
 result.RemoveAt(index); *@
 
-        var success = false;
+    ResultStruct currentItem = result.Find(x => x.ID == ID);
+
         try
         {
-            var body = new
-            {
-                ID = ID
-            };
-
+            successMsg = "";
+            disabled = true;
             var response = await Http.DeleteAsync(GetWealthApiUrl($"wealth/delete/{ID}"));
             if (response.IsSuccessStatusCode)
             {
-                var stringData = await response.Content.ReadAsStringAsync();
-                success = Boolean.Parse(stringData);
+                successMsg = $"Success delete {currentItem.Location} {currentItem.Sublocation}";
+                await GetFibonacci();
             }
             else
             {
-                throw new Exception(response.ReasonPhrase);
+                Console.WriteLine(response.ToString());
+                var stringData = await response.Content.ReadAsStringAsync();
+                throw new Exception(stringData);
             }
 
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            errorMsg = ex.Message;
         }
-
-        if (!success)
+        finally
         {
-            errorMsg = "Delete Item failed";
+            disabled = false;
         }
     }
 }

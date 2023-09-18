@@ -1,0 +1,203 @@
+﻿@page "/wealth/edit/{ID:int}"
+@inject IConfiguration Configuration
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Wealth</PageTitle>
+
+<h1>Edit Wealth ID: @ID</h1>
+
+<div class="">
+    <a class="btn btn-secondary" href="wealth">Back</a>
+</div>
+
+<div class="mt-3">
+    <form>
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" class="form-control" id="location" aria-describedby="location"
+                placeholder="Enter location" @bind="Location" />
+            <ErrorDiv error="@(Error["Location"])" />
+        </div>
+        <div class="form-group mt-2">
+            <label for="sublocation">Sub Location</label>
+            <input type="text" class="form-control" id="sublocation" aria-describedby="sublocation"
+                placeholder="Enter sublocation" @bind="Sublocation" />
+            <ErrorDiv error="@(Error["Sublocation"])" />
+        </div>
+        <div class="mt-2">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="activeWealth" @bind="Active">
+                <label class="form-check-label" for="activeWealth">Active</label>
+            </div>
+            <ErrorDiv error="@(Error["Active"])" />
+        </div>
+        <div class="form-group mt-2">
+            <label for="sublocation">Value</label>
+            <input type="number" class="form-control" id="value" aria-describedby="value" placeholder="Enter value"
+                @bind="Value" />
+            <ErrorDiv error="@(Error["Value"])" />
+        </div>
+        <div class="form-group mt-2">
+            <label for="sublocation">ValueInRupiah</label>
+            <input type="number" class="form-control" id="valueInRupiah" aria-describedby="valueInRupiah"
+                placeholder="Enter valueInRupiah" @bind="ValueInRupiah" />
+            <ErrorDiv error="@(Error["ValueInRupiah"])" />
+        </div>
+        <div class="mt-3">
+            <ErrorDiv error="@errorMsg" />
+            <button type="button" class="btn btn-primary" @onclick="UpdateItem" disabled="@disabled">Submit</button>
+        </div>
+    </form>
+
+</div>
+
+@code {
+    [Parameter]
+    public int ID { get; set; }
+
+    private string errorMsg = "";
+    private bool disabled = false;
+
+    @* private int ID *@
+    private string Location = "";
+    private string Sublocation = "";
+    private bool Active;
+    private double Value;
+    private double ValueInRupiah;
+
+    private Dictionary<string, string> Error = new Dictionary<string, string>();
+
+    public class ResultStruct
+    {
+        public string Location { set; get; } = "";
+        public string Sublocation { set; get; } = "";
+        public bool Active { set; get; }
+        public double Value { set; get; }
+        public double ValueInRupiah { set; get; }
+    }
+
+    protected override void OnInitialized()
+    {
+        CleanErrors();
+    }
+
+    private void CleanErrors()
+    {
+        Error = new Dictionary<string, string>(){
+{"Location", ""},
+{"Sublocation", ""},
+{"Active", ""},
+{"Value", ""},
+{"ValueInRupiah", ""}
+};
+    }
+
+    private string GetWealthApiUrl(string suffix, string queryString = "")
+    {
+        var url = Configuration["WealthApiUrl"] + suffix;
+        if (queryString != "")
+        {
+            url += "?" + queryString;
+        }
+        return url;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetFibonacciByID();
+    }
+
+    protected async Task GetFibonacciByID()
+    {
+        try
+        {
+            var queryString = System.Web.HttpUtility.ParseQueryString(string.Empty);
+            @* queryString.Add("fn", fn.ToString()); *@
+
+            ResultStruct result = await Http.GetFromJsonAsync<ResultStruct>(GetWealthApiUrl($"wealth/get/{ID}",
+            queryString.ToString()));
+
+            Location = result.Location;
+            Sublocation = result.Sublocation;
+            Active = result.Active;
+            Value = result.Value;
+            ValueInRupiah = result.ValueInRupiah;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            errorMsg = ex.Message;
+        }
+    }
+
+    private bool Validate()
+    {
+        bool validate = true;
+
+        if (ID == 0)
+        {
+            validate = false;
+            errorMsg = "ID is required";
+        }
+        if (Location == "")
+        {
+            validate = false;
+            Error["Location"] = "Location is required";
+        }
+        if (Sublocation == "")
+        {
+            validate = false;
+            Error["Sublocation"] = "Sub Location is required";
+        }
+
+        return validate;
+    }
+
+    private async Task UpdateItem()
+    {
+        CleanErrors();
+        errorMsg = "";
+
+        if (!Validate())
+        {
+            return;
+        }
+
+        try
+        {
+            disabled = true;
+            var body = new
+            {
+                ID = ID,
+                Location = Location,
+                Sublocation = Sublocation,
+                Active = Active,
+                Value = Value,
+                ValueInRupiah = ValueInRupiah
+            };
+            ;
+            var response = await Http.PutAsJsonAsync(GetWealthApiUrl("wealth/update"), body);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("wealth");
+            }
+            else
+            {
+                Console.WriteLine(response.ToString());
+                var stringData = await response.Content.ReadAsStringAsync();
+                throw new Exception(stringData);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            errorMsg = ex.Message;
+        }
+        finally
+        {
+            disabled = false;
+        }
+    }
+
+}

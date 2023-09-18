@@ -1,0 +1,157 @@
+﻿@page "/wealth/add"
+@inject IConfiguration Configuration
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<PageTitle>Add Wealth</PageTitle>
+
+<h1>Add Wealth</h1>
+
+<div class="">
+    <a class="btn btn-secondary" href="wealth">Back</a>
+</div>
+
+<div class="mt-3">
+    <form>
+        <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" class="form-control" id="location" aria-describedby="location"
+                placeholder="Enter location" @bind="Location" />
+            <ErrorDiv error="@(Error["Location"])" />
+        </div>
+        <div class="form-group mt-2">
+            <label for="sublocation">Sub Location</label>
+            <input type="text" class="form-control" id="sublocation" aria-describedby="sublocation"
+                placeholder="Enter sublocation" @bind="Sublocation" />
+            <ErrorDiv error="@(Error["Sublocation"])" />
+        </div>
+        <div class="mt-2">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="activeWealth" @bind="Active">
+                <label class="form-check-label" for="activeWealth">Active</label>
+            </div>
+            <ErrorDiv error="@(Error["Active"])" />
+        </div>
+        <div class="form-group mt-2">
+            <label for="sublocation">Value</label>
+            <input type="number" class="form-control" id="value" aria-describedby="value" placeholder="Enter value"
+                @bind="Value" />
+            <ErrorDiv error="@(Error["Value"])" />
+        </div>
+        <div class="form-group mt-2">
+            <label for="sublocation">ValueInRupiah</label>
+            <input type="number" class="form-control" id="valueInRupiah" aria-describedby="valueInRupiah"
+                placeholder="Enter valueInRupiah" @bind="ValueInRupiah" />
+            <ErrorDiv error="@(Error["ValueInRupiah"])" />
+        </div>
+        <div class="mt-3">
+            <ErrorDiv error="@errorMsg" />
+            <button type="button" class="btn btn-primary" @onclick="NewItem" disabled="@disabled">Submit</button>
+        </div>
+    </form>
+
+</div>
+
+@code {
+    private string errorMsg = "";
+    private bool disabled = false;
+
+    @* private int ID *@
+    private string Location = "";
+    private string Sublocation = "";
+    private bool Active;
+    private double Value;
+    private double ValueInRupiah;
+
+    private Dictionary<string, string> Error = new Dictionary<string, string>();
+
+    protected override void OnInitialized()
+    {
+        CleanErrors();
+    }
+
+    private void CleanErrors()
+    {
+        Error = new Dictionary<string, string>(){
+{"Location", ""},
+{"Sublocation", ""},
+{"Active", ""},
+{"Value", ""},
+{"ValueInRupiah", ""}
+};
+    }
+
+    private string GetWealthApiUrl(string suffix, string queryString = "")
+    {
+        var url = Configuration["WealthApiUrl"] + suffix;
+        if (queryString != "")
+        {
+            url += "?" + queryString;
+        }
+        return url;
+    }
+
+    private bool Validate()
+    {
+        bool validate = true;
+
+        if (Location == "")
+        {
+            validate = false;
+            Error["Location"] = "Location is required";
+        }
+        if (Sublocation == "")
+        {
+            validate = false;
+            Error["Sublocation"] = "Sub Location is required";
+        }
+
+        return validate;
+    }
+
+    private async Task NewItem()
+    {
+        CleanErrors();
+        errorMsg = "";
+
+        if (!Validate())
+        {
+            return;
+        }
+
+        try
+        {
+            disabled = true;
+            var postBody = new
+            {
+                Location = Location,
+                Sublocation = Sublocation,
+                Active = Active,
+                Value = Value,
+                ValueInRupiah = ValueInRupiah
+            };
+
+            var response = await Http.PostAsJsonAsync(GetWealthApiUrl("wealth/new"), postBody);
+            if (response.IsSuccessStatusCode)
+            {
+                NavigationManager.NavigateTo("wealth");
+            }
+            else
+            {
+                Console.WriteLine(response.ToString());
+                var stringData = await response.Content.ReadAsStringAsync();
+                throw new Exception(stringData);
+            }
+
+        }
+        catch (Exception ex)
+        {
+            errorMsg = ex.Message;
+        }
+        finally
+        {
+            disabled = false;
+        }
+    }
+
+}
