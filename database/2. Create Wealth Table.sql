@@ -1,0 +1,12 @@
+CREATE TABLE wealths(
+	id INT PRIMARY KEY AUTO_INCREMENT,
+	UserID INT NOT NULL,
+	location VARCHAR(255) NOT NULL,
+	sublocation VARCHAR(255) NOT NULL,
+	`active` BIT NOT NULL,
+	`value` DECIMAL(18,9) NULL,
+	valueInRupiah DECIMAL(18,9) NOT NULL,
+	createdAt TIMESTAMP NOT NULL,
+	updatedAt TIMESTAMP NULL,
+	deletedAt TIMESTAMP NULL
+)

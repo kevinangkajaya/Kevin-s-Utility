@@ -1,0 +1,1 @@
+CREATE DATABASE `Kevin's Utility` /*!40100 COLLATE 'uca1400_ai_ci' */;

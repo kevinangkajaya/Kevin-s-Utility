@@ -34,8 +34,12 @@
         </div>
         <div class="form-group mt-2">
             <label for="sublocation">Value</label>
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="useValue" @bind="UseValue">
+                <label class="form-check-label" for="useValue">Use Value</label>
+            </div>
             <input type="number" class="form-control" id="value" aria-describedby="value" placeholder="Enter value"
-                @bind="Value" />
+                disabled="@(UseValue == false)" @bind="Value" />
             <ErrorDiv error="@(Error["Value"])" />
         </div>
         <div class="form-group mt-2">
@@ -60,6 +64,7 @@
     private string Location = "";
     private string Sublocation = "";
     private bool Active;
+    private bool UseValue;
     private double Value;
     private double ValueInRupiah;
 
@@ -100,11 +105,6 @@
             validate = false;
             Error["Location"] = "Location is required";
         }
-        if (Sublocation == "")
-        {
-            validate = false;
-            Error["Sublocation"] = "Sub Location is required";
-        }
 
         return validate;
     }
@@ -122,12 +122,14 @@
         try
         {
             disabled = true;
+
+            double? ValueResult = UseValue == false ? null : Value;
             var postBody = new
             {
                 Location = Location,
                 Sublocation = Sublocation,
                 Active = Active,
-                Value = Value,
+                Value = ValueResult,
                 ValueInRupiah = ValueInRupiah
             };
 
