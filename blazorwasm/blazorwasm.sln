@@ -5,6 +5,10 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "blazorwasm", "blazorwasm.csproj", "{6DAF927A-9CE0-4B6E-8AEF-082C8AE39ECE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "webapi2", "..\webapi2\webapi2.csproj", "{1DD0AB92-6CA6-4691-A2EE-D0A5F5D0BDD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "webapi", "..\webapi\webapi.csproj", "{2A14A4DF-8EF7-4E35-9AB1-DDD2C88FA8AB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{6DAF927A-9CE0-4B6E-8AEF-082C8AE39ECE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DAF927A-9CE0-4B6E-8AEF-082C8AE39ECE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DAF927A-9CE0-4B6E-8AEF-082C8AE39ECE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DD0AB92-6CA6-4691-A2EE-D0A5F5D0BDD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DD0AB92-6CA6-4691-A2EE-D0A5F5D0BDD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DD0AB92-6CA6-4691-A2EE-D0A5F5D0BDD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DD0AB92-6CA6-4691-A2EE-D0A5F5D0BDD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A14A4DF-8EF7-4E35-9AB1-DDD2C88FA8AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A14A4DF-8EF7-4E35-9AB1-DDD2C88FA8AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A14A4DF-8EF7-4E35-9AB1-DDD2C88FA8AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A14A4DF-8EF7-4E35-9AB1-DDD2C88FA8AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
